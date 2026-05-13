@@ -1,26 +1,29 @@
+const jwt          = require("jsonwebtoken");
 const { getRedis } = require("../config/redis");
 
 async function requireAuth(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
+    // Accepte le token depuis le cookie OU le header Authorization
+    const token =
+      req.cookies?.token ||
+      req.headers.authorization?.replace("Bearer ", "");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token provided" });
-    }
+    if (!token)
+      return res.status(401).json({ error: "Non authentifié" });
 
-    const token = authHeader.split(" ")[1];
-    const redis = getRedis();
-    const session = await redis.get(`session:${token}`);
+    // Vérifier la signature JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!session) {
-      return res.status(401).json({ error: "Session expired or invalid" });
-    }
+    // Vérifier que la session existe encore dans Redis
+    const redis   = getRedis();
+    const session = await redis.get(`session:${decoded.id}`);
+    if (!session)
+      return res.status(401).json({ error: "Session expirée, reconnectez-vous" });
 
-    req.user = JSON.parse(session);
+    req.user = decoded; // { id, role, email }
     next();
-
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(401).json({ error: "Token invalide" });
   }
 }
 

@@ -24,14 +24,14 @@ export class LoginComponent implements OnInit {
     private snackBar: MatSnackBar,
     private fb: FormBuilder) {
     this.formSignup = this.fb.group({
-      fullname: ['', [Validators.required, Validators.minLength(3)]],
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(3)]]
-    })
+  fullname: ['', [Validators.required, Validators.minLength(3)]],
+  email:    ['', [Validators.required, Validators.email]],
+  password: ['', [Validators.required, Validators.minLength(3)]]
+})
     this.formLogin = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(3)]]
-    })
+  email: ['', [Validators.required, Validators.email]],
+  password: ['', [Validators.required, Validators.minLength(3)]]
+})
   }
   faUser = faUser
   facebook = faFacebookF
@@ -49,30 +49,41 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.formSignup.patchValue(this.userService.getEmptyUser())
-    this.formLogin.patchValue(this.userService.getEmptyUser())
-  }
-
-  async onSubmit(type: string) {
-    const coords = type === 'signup' ? this.formSignup.value : this.formLogin.value
-    const user = { ...coords, imgUrl: this.imgData.imgUrl, hostMsg: 0, userMsg: 0 }
-    try {
-      if (this.isSignup) await this.userService.signup(user)
-      else await this.userService.login(coords)
-      this.router.navigateByUrl('')
-    } catch (err) {
-      this.snackBar.open('Username or password wrong', 'Close', { duration: 3000 })
-      console.log(err)
+  try {
+    const empty = this.userService.getEmptyUser()
+    if (empty) {
+      this.formSignup.patchValue(empty)
+      this.formLogin.patchValue(empty)
     }
+  } catch(e) {
+    console.error('getEmptyUser failed', e)
   }
+}
 
-  async onSignDemo() {
-    const demoCoords = this.userService.getEmptyUser() as User
-    demoCoords.username = 'demo'
-    demoCoords.password = 'demo'
-    await this.userService.login(demoCoords)
+ async onSubmit(type: string) {
+  const coords = type === 'signup' ? this.formSignup.value : this.formLogin.value
+  try {
+    if (this.isSignup) await this.userService.signup({
+      ...coords,
+      name: coords.fullname,   // backend attend "name"
+      imgUrl: this.imgData.imgUrl
+    })
+    else await this.userService.login(coords)
     this.router.navigateByUrl('')
+  } catch (err) {
+    this.snackBar.open('Email ou mot de passe incorrect', 'Close', { duration: 3000 })
+    console.log(err)
   }
+}
+
+ async onSignDemo() {
+  try {
+    await this.userService.login({ email: 'test@test.com', password: '123456' } as any)
+    this.router.navigateByUrl('')
+  } catch (err) {
+    this.snackBar.open('Demo user introuvable', 'Close', { duration: 3000 })
+  }
+}
 
   async uploadImg(ev: Event) {
     const { secure_url, height, width } = await this.uploadImgService.uploadImg(ev)

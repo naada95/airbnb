@@ -12,7 +12,6 @@ export class HttpService {
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     }
   }
-
   constructor() { }
 
   public get(endpoint: string, data?: any) {

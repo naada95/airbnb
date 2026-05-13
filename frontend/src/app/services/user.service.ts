@@ -22,11 +22,13 @@ export class UserService {
     public snackBar: MatSnackBar) {
       const user = this.getUser()
       this._user$.next(user)
-      if(user) {
-        this.socketService.login(user._id)
-        this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_HOST, this.hostFunction)
-        this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_USER, this.userFunction)
-      }
+       if(user) {
+    try { this.socketService.login(user._id) } catch(e) {}
+    try {
+      this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_HOST, this.hostFunction)
+      this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_USER, this.userFunction)
+    } catch(e) {}
+  }
   }
 
   private USER_URL = 'user/'
@@ -43,29 +45,36 @@ export class UserService {
     return JSON.parse(sessionStorage.getItem(this.STORAGE_KEY_LOGGEDIN_USER) as string)
   }
 
-  public async login(credentials: User) {
-    try {
-      const res = await this.httpService.post(this.AUTH_URL + 'login', credentials) as any
-      const loggedInUser = res.user        // ← notre backend retourne { token, user }
-      if (loggedInUser) {
-        sessionStorage.setItem('token', res.token)  // ← sauvegarder le token
-        this.saveLocalUser(loggedInUser)
-        this.socketService.login(loggedInUser._id)
+  public async login(credentials: any) {
+  try {
+    const res = await this.httpService.post(this.AUTH_URL + 'login', credentials) as any
+    const loggedInUser = res.user
+    if (loggedInUser) {
+      sessionStorage.setItem('token', res.token)
+      this.saveLocalUser(loggedInUser)
+      try { this.socketService.login(loggedInUser._id) } catch (e) {}
+      try {
         this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_HOST, this.hostFunction)
         this.socketService.on(this.socketService.SOCKET_EMIT_ORDER_FOR_USER, this.userFunction)
-        this._user$.next(loggedInUser)
-      }
-    } catch (err) { throw err }
-  }
+      } catch (e) {}
+      this._user$.next(loggedInUser)
+    }
+  } catch (err) { throw err }
+}
 
-  public async signup(user: User) {
-    try {
-      const res = await this.httpService.post(this.AUTH_URL + 'register', user) as any  // ← signup → register
-      sessionStorage.setItem('token', res.token)   // ← sauvegarder le token
-      this.saveLocalUser(res.user)
-      this._user$.next(res.user)
-    } catch (err) { throw err }
-  }
+public async signup(user: any) {
+  try {
+    const res = await this.httpService.post(this.AUTH_URL + 'register', {
+      name: user.fullname || user.name,
+      email: user.email || user.username,
+      password: user.password,
+      role: 'guest'
+    }) as any
+    sessionStorage.setItem('token', res.token)
+    this.saveLocalUser(res.user)
+    this._user$.next(res.user)
+  } catch (err) { throw err }
+}
 
   public async logout() {
     try {
@@ -81,7 +90,7 @@ export class UserService {
 
   public getEmptyUser() {
     return {
-      username: '',
+      email: '',
       fullname: '',
       password: '',
       imgUrl: '',

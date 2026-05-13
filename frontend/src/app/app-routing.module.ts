@@ -14,7 +14,10 @@ import { UserStaysComponent } from './cmps/user-stays/user-stays.component';
 import { UserWishlistComponent } from './cmps/user-wishlist/user-wishlist.component';
 import { AboutComponent } from './pages/about/about.component';
 const routes: Routes = [
+  { path: '', component: StayIndexComponent },
   { path: 'home', component: HomeComponent },
+  { path: 'login', component: LoginComponent },       // ← AVANT /:stayId
+  { path: 'about', component: AboutComponent },       // ← AVANT /:stayId
   {
     path: 'user', component: UserComponent, canActivate: [AuthGuard], children: [
       { path: 'edit/:id', component: EditStayComponent },
@@ -25,14 +28,11 @@ const routes: Routes = [
       { path: 'wishlist', component: UserWishlistComponent },
     ]
   },
-  { path: 'login', component: LoginComponent },
-  { path: 'about', component: AboutComponent },
   {
-    path: ':stayId',
+    path: ':stayId',                                  // ← TOUJOURS EN DERNIER
     loadChildren: () => import('./lazy-loading/lazy-loading.module').then(m => m.LazyLoadingModule),
     resolve: { stay: StayResolver },
   },
-  { path: '', component: StayIndexComponent },
 ]
 
 @NgModule({

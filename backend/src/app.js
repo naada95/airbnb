@@ -72,6 +72,11 @@ app.options("/*splat", cors()); // preflight pour toutes les routes
 
 app.use(express.json());
 
+const cookieParser = require("cookie-parser");
+
+
+app.use(cookieParser());
+
 // Rate limiting
 app.use(rateLimit({ windowSec: 60, max: 200, keyPrefix: "rl:global" }));
 app.use("/api/auth/login",    rateLimit({ windowSec: 60, max: 10, keyPrefix: "rl:login" }));

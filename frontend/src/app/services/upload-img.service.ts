@@ -1,3 +1,7 @@
+import { Injectable } from '@angular/core';
+@Injectable({
+  providedIn: 'root'   // ← ajouter cette ligne
+})
 export class UploadImgService {
 
   constructor() { }

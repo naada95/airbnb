@@ -1,7 +1,11 @@
 <section [ngClass]="isOpenFooter ? 'footer' : ''" class="header-menu-modal">
     <div *ngIf="!isLoggedInUser()">
-        <span [routerLink]="['/login']" class="bold">{{'stay.header.sign-up' | translate}}</span>
-        <span [routerLink]="['/login']">{{'stay.header.login' | translate}}</span>
+        <span (click)="goToLogin($event)" class="bold">
+            {{'stay.header.sign-up' | translate}}
+        </span>
+        <span (click)="goToLogin($event)">
+            {{'stay.header.login' | translate}}
+        </span>
     </div>
     <div *ngIf="isLoggedInUser()">
         <span [routerLink]="['/user/trips']" (click)="toggleMenuModal()" class="bold">{{'stay.header.trips' | translate}}</span>

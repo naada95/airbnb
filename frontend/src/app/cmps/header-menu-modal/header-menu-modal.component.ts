@@ -14,8 +14,13 @@ export class HeaderMenuModalComponent {
   @Input() isOpenLanguageModal!: boolean
   @Input() isOpenFooter!: boolean
 
-  constructor(private router: Router,
-    private userService: UserService) { }
+  constructor(private router: Router, private userService: UserService) {}
+
+ goToLogin(ev: Event) {
+  ev.stopPropagation()
+  this.toggleMenuModal()
+  window.location.href = '/#/login'  // navigation directe, bypasse le router
+}
 
   onToggleLanguageModal() {
     this.toggleLanguageModal.emit()

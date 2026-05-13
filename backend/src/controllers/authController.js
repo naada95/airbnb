@@ -1,59 +1,65 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User    = require("../models/User");
+const jwt     = require("jsonwebtoken");
 const { getRedis } = require("../config/redis");
+
+// ── Génère un JWT et stocke la session dans Redis ──
+async function generateSession(user, res) {
+  const payload = { id: user._id, role: user.role, email: user.email };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "24h",
+  });
+
+  // Stocker la session dans Redis avec TTL
+  const redis = getRedis();
+  const sessionKey = `session:${user._id}`;
+  await redis.set(
+    sessionKey,
+    JSON.stringify({ role: user.role, email: user.email, name: user.name }),
+    "EX",
+    Number(process.env.SESSION_TTL || 86400)
+  );
+
+  // Cookie HttpOnly (plus sécurisé que localStorage)
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000, // 24h en ms
+  });
+
+  return token;
+}
 
 // ── REGISTER ──────────────────────────────────────
 async function register(req, res) {
   try {
     const { name, email, password, role = "guest" } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "name, email and password are required" });
-    }
+    if (!name || !email || !password)
+      return res.status(400).json({ error: "Champs requis manquants" });
 
-    // Check email not taken
     const exists = await User.findOne({ email });
-    if (exists) {
-      return res.status(409).json({ error: "Email already registered" });
-    }
+    if (exists)
+      return res.status(409).json({ error: "Email déjà utilisé" });
 
-    // Build user based on role
-    const userData = {
+    const user = await User.create({
       name,
       email,
-      password_hash: password, // pre-save hook will hash it
+      password_hash: password, // hashé automatiquement par le pre-save hook
       role,
-      preferences: { language: "fr", currency: "MAD", timezone: "Africa/Casablanca" },
-    };
-
-    if (role === "guest") {
-      userData.guest_profile = { verified_id: false, wishlist_ids: [], total_trips: 0, is_superguest: false };
-    } else if (role === "host") {
-      userData.host_profile = { is_superhost: false, is_verified: false, total_listings: 0, member_since: new Date() };
-    }
-
-    const user = await User.create(userData);
-
-    // Create JWT + store in Redis
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+      is_active: true,
+      created_at: new Date(),
+      last_login: new Date(),
     });
 
-    const redis = getRedis();
-    await redis.set(`session:${token}`, JSON.stringify({
-      id: user._id,
-      role: user.role,
-      currency: user.preferences.currency,
-    }), "EX", 60 * 60 * 24 * 7); // 7 days
+    const token = await generateSession(user, res);
 
     res.status(201).json({
-      message: "User registered successfully",
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
     });
-
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 }
@@ -63,37 +69,30 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "email and password are required" });
-    }
+    if (!email || !password)
+      return res.status(400).json({ error: "Email et mot de passe requis" });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user)
+      return res.status(401).json({ error: "Identifiants invalides" });
 
-    const valid = await user.comparePassword(password);
-    if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+    if (user.is_active === false)
+      return res.status(403).json({ error: "Compte désactivé" });
 
-    // Update last_login
+    const ok = await user.comparePassword(password);
+    if (!ok)
+      return res.status(401).json({ error: "Identifiants invalides" });
+
+    // Mettre à jour last_login
     user.last_login = new Date();
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-
-    const redis = getRedis();
-    await redis.set(`session:${token}`, JSON.stringify({
-      id: user._id,
-      role: user.role,
-      currency: user.preferences.currency,
-    }), "EX", 60 * 60 * 24 * 7);
+    const token = await generateSession(user, res);
 
     res.json({
-      message: "Login successful",
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -102,21 +101,22 @@ async function login(req, res) {
 // ── LOGOUT ────────────────────────────────────────
 async function logout(req, res) {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (token) {
+    if (req.user) {
       const redis = getRedis();
-      await redis.del(`session:${token}`);
+      await redis.del(`session:${req.user.id}`); // supprime la session Redis
     }
-    res.json({ message: "Logged out successfully" });
+    res.clearCookie("token");
+    res.json({ message: "Déconnecté" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
 
-// ── GET ME ────────────────────────────────────────
+// ── ME (profil connecté) ──────────────────────────
 async function getMe(req, res) {
   try {
     const user = await User.findById(req.user.id).select("-password_hash");
+    if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
