@@ -1,0 +1,66 @@
+services:
+    mongodb:
+        image: mongo:7
+        container_name: airbnb_mongo
+        restart: unless-stopped
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+            MONGO_INITDB_DATABASE: airbnb
+            MONGO_APP_USER: ${MONGO_APP_USER}
+            MONGO_APP_PASS: ${MONGO_APP_PASS}
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/data/db
+            - ./mongo/init:/docker-entrypoint-initdb.d
+        networks:
+            - airbnb_net
+
+    mongo-express:
+        image: mongo-express:1
+        container_name: airbnb_mongo_ui
+        restart: unless-stopped
+        ports:
+            - "8081:8081"
+        environment:
+            ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER}
+            ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASS}
+            ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@mongodb:27017/
+            ME_CONFIG_BASICAUTH: false
+        depends_on:
+            - mongodb
+        networks:
+            - airbnb_net
+
+    redis:
+        image: redis:7-alpine
+        container_name: airbnb_redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        command: >
+            redis-server
+            --requirepass ${REDIS_PASS}
+            --appendonly yes
+            --appendfsync everysec
+        volumes:
+            - redis_data:/data
+        networks:
+            - airbnb_net
+
+    redis-insight:
+        image: redis/redisinsight:latest
+        container_name: airbnb_redis_ui
+        restart: unless-stopped
+        ports:
+            - "5540:5540"
+        networks:
+            - airbnb_net
+
+volumes:
+    mongo_data:
+    redis_data:
+
+networks:
+    airbnb_net:

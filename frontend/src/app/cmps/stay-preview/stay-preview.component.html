@@ -1,0 +1,47 @@
+<!-->
+<section class="stay-preview">
+  <img-carousel [stay]="stay"></img-carousel>
+  <div class="details">
+    <div class="top">
+      <div class="loc">{{stay.loc.address}}</div>
+      <div class="rate">
+        <fa-icon [icon]="faStar"></fa-icon>
+        <span>{{getRateAvg()}}</span>
+      </div>
+    </div>
+    <div class="name">{{stay.name}}</div>
+    <div>{{stay.roomType}}</div>
+    <div class="price"><span>$ {{stay.price}}  </span>/ night</div>
+  </div>
+</section>
+>
+-->
+<section class="stay-preview">
+  <img-carousel [stay]="stay"></img-carousel>
+
+  <div class="details">
+    <div class="top">
+      <div class="loc">{{ stay.loc.city }}, {{ stay.loc.country }}</div>
+      <div class="rate">
+        <fa-icon [icon]="faStar"></fa-icon>
+        <span>{{ getRateAvg() }}</span>
+      </div>
+    </div>
+
+    <div class="name">{{ stay.name }}</div>
+
+    <div class="meta">
+      <span>{{ stay.bedrooms }} ch.</span>
+      <!--<span class="dot"></span>
+      <span>{{ stay.bedrooms }} lits</span>-->
+      <span class="dot"></span>
+      <span>{{ stay.bathrooms }} sdb</span>
+    </div>
+
+    <div class="price">
+      <span class="amount">{{ stay.price }} $</span>
+      <span class="per-night">/ nuit</span>
+    </div>
+  </div>
+</section>
+/
