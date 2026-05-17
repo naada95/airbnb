@@ -1,0 +1,558 @@
+@import '../setup/variables';
+@import '../setup/mixins';
+
+// ── Layout ──────────────────────────────────────────────
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f4f6;
+  font-family: $font-main;
+}
+
+.admin-main {
+  flex: 1;
+  padding: $spacing-xl;
+  overflow-y: auto;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xl;
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: $secondary;
+  }
+}
+
+// ── Nav ─────────────────────────────────────────────────
+.admin-nav {
+  width: 240px;
+  min-height: 100vh;
+  background: $secondary;
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-lg $spacing-md;
+  position: sticky;
+  top: 0;
+
+  &__brand {
+    font-size: 18px;
+    font-weight: 700;
+    color: $white;
+    margin-bottom: $spacing-xl;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  &__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    li a {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      padding: 10px $spacing-md;
+      border-radius: $radius-sm;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255,255,255,0.08);
+        color: $white;
+      }
+
+      &.active {
+        background: $primary;
+        color: $white;
+      }
+    }
+  }
+
+  &__logout {
+    margin-top: auto;
+    padding: 10px $spacing-md;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: $radius-sm;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(255,255,255,0.1);
+      color: $white;
+    }
+  }
+}
+
+// ── Stats grid (dashboard) ───────────────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.stat-card {
+  background: $white;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  &__icon {
+    font-size: 28px;
+  }
+
+  &__value {
+    font-size: 32px;
+    font-weight: 700;
+    color: $secondary;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 13px;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  a {
+    font-size: 13px;
+    color: $primary;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: $spacing-xs;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ── Table ────────────────────────────────────────────────
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $white;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  thead tr {
+    background: #f9fafb;
+    border-bottom: 2px solid $border;
+  }
+
+  th {
+    padding: 12px $spacing-md;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 14px $spacing-md;
+    font-size: 14px;
+    color: $secondary;
+    border-bottom: 1px solid $border;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover { background: #fafafa; }
+    &:last-child td { border-bottom: none; }
+  }
+
+  .actions {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+  }
+}
+
+// ── Badges ───────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &-success  { background: #dcfce7; color: $success; }
+  &-warning  { background: #fef9c3; color: #92400e; }
+  &-danger   { background: #fee2e2; color: $danger; }
+  &-info     { background: #dbeafe; color: $info; }
+  &-admin    { background: #ede9fe; color: #5b21b6; }
+  &-host     { background: #ffedd5; color: #c2410c; }
+  &-guest    { background: #f3f4f6; color: $text-light; }
+}
+
+// ── Boutons ──────────────────────────────────────────────
+.btn-primary {
+  background: $primary;
+  color: $white;
+  border: none;
+  padding: 10px $spacing-lg;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: $primary-dark; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-edit {
+  background: #dbeafe;
+  color: $info;
+  border: none;
+  padding: 6px 12px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #bfdbfe; }
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: $danger;
+  border: none;
+  padding: 6px 12px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #fecaca; }
+}
+
+.btn-cancel {
+  background: $bg-light;
+  color: $secondary;
+  border: 1px solid $border;
+  padding: 10px $spacing-lg;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover { background: darken($bg-light, 5%); }
+}
+
+// ── Formulaire listing ───────────────────────────────────
+.listing-form {
+  max-width: 780px;
+}
+
+.form-section {
+  background: $white;
+  border-radius: $radius-md;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-sm;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: $secondary;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $border;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $secondary;
+  }
+
+  input, textarea, select {
+    padding: 10px $spacing-md;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    font-size: 14px;
+    color: $secondary;
+    background: $white;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    }
+  }
+
+  textarea { resize: vertical; }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: flex-end;
+  padding: $spacing-lg 0;
+}
+
+// ── Images preview ───────────────────────────────────────
+.img-add-row {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+
+  input { flex: 1; }
+}
+
+.img-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.img-preview-item {
+  position: relative;
+  width: 100px;
+  height: 80px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: $radius-sm;
+    border: 1px solid $border;
+  }
+
+  button {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: $danger;
+    color: $white;
+    border: none;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+}
+
+// ── Équipements ──────────────────────────────────────────
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $spacing-sm;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 13px;
+  color: $secondary;
+  cursor: pointer;
+
+  input[type="checkbox"] { accent-color: $primary; }
+}
+
+// ── Bookings stats ───────────────────────────────────────
+.bookings-stats {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-lg;
+}
+
+.mini-stat {
+  background: $white;
+  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-md;
+  box-shadow: $shadow-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 14px;
+
+  &.revenue {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+  }
+
+  strong { font-size: 18px; font-weight: 700; }
+}
+
+// ── Filtres ──────────────────────────────────────────────
+.admin-filters,
+.admin-search {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  input, select {
+    padding: 10px $spacing-md;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    font-size: 14px;
+    background: $white;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+
+  .search-input  { flex: 1; }
+  .status-filter { width: 180px; }
+}
+
+// ── Users ────────────────────────────────────────────────
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid $border;
+}
+
+.role-select {
+  padding: 5px $spacing-sm;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  background: $white;
+  cursor: pointer;
+}
+
+// ── Listing thumbnail ─────────────────────────────────────
+.listing-thumb {
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+}
+
+// ── Recent section (dashboard) ────────────────────────────
+.recent-section {
+  background: $white;
+  border-radius: $radius-md;
+  padding: $spacing-xl;
+  box-shadow: $shadow-sm;
+  margin-top: $spacing-xl;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $secondary;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+.see-all {
+  display: inline-block;
+  margin-top: $spacing-md;
+  color: $primary;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+// ── États vides / erreurs ─────────────────────────────────
+.empty {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $text-light;
+  font-size: 14px;
+}
+
+.error-msg {
+  background: #fee2e2;
+  color: $danger;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  button {
+    background: $danger;
+    color: $white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: 13px;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $text-light;
+  font-size: 16px;
+}
+
+// ── Guest info (bookings) ─────────────────────────────────
+.guest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  small { color: $text-light; font-size: 12px; }
+}

@@ -58,9 +58,9 @@ export class StayService {
   }
 
   public save(stay: any) {
-    if (stay._id) return this.httpService.put(this.STAY_URL, stay)
-    return this.httpService.post(this.STAY_URL, stay)
-  }
+  if (stay._id) return this.httpService.put(`${this.STAY_URL}${stay._id}`, stay)
+  return this.httpService.post(this.STAY_URL, stay)
+}
 
   // ─── getEmptyFilter — avec tous les champs ───────────────────────────────────
   public getEmptyFilter(): StayFilter {

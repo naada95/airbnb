@@ -15,6 +15,10 @@
       "prefix": "",
       "architect": {
         "build": {
+          "options": {
+    "stylePreprocessorOptions": {
+      "includePaths": ["src/assets/styles"]
+    },
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "allowedCommonJsDependencies": [

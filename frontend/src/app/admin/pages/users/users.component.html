@@ -1,0 +1,84 @@
+<div class="admin-layout">
+  <admin-nav></admin-nav>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <h1>👥 Utilisateurs ({{ filteredUsers.length }})</h1>
+    </div>
+
+    <!-- Recherche -->
+    <div class="admin-search">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom, email ou rôle..."
+      />
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="errorMsg" class="error-msg">
+      {{ errorMsg }}
+      <button (click)="loadUsers()">Réessayer</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+    <!-- Table -->
+    <table *ngIf="!isLoading && !errorMsg" class="admin-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Inscrit le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>
+            <div class="user-info">
+              <img
+                [src]="user.avatar_url || 'assets/default-avatar.png'"
+                alt=""
+                class="user-avatar"
+              />
+              <span>{{ user.name }}</span>
+            </div>
+          </td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span [class]="'badge ' + getRoleClass(user.role)">
+              {{ user.role }}
+            </span>
+          </td>
+          <td>{{ user.created_at | date:'dd/MM/yyyy' }}</td>
+          <td class="actions">
+            <select
+              [value]="user.role"
+              (change)="onChangeRole(user, $event)"
+              class="role-select"
+            >
+              <option value="guest">Guest</option>
+              <option value="host">Host</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button
+              class="btn-delete"
+              (click)="onDeleteUser(user._id)"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!isLoading && !errorMsg && filteredUsers.length === 0" class="empty">
+      Aucun utilisateur trouvé.
+    </p>
+
+  </main>
+</div>

@@ -1,124 +1,159 @@
-const User    = require("../models/User");
-const jwt     = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const jwt    = require("jsonwebtoken");
+const User   = require("../models/User");
 const { getRedis } = require("../config/redis");
 
-// ── Génère un JWT et stocke la session dans Redis ──
-async function generateSession(user, res) {
-  const payload = { id: user._id, role: user.role, email: user.email };
+const SESSION_TTL = 7 * 24 * 60 * 60;
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-  });
-
-  // Stocker la session dans Redis avec TTL
-  const redis = getRedis();
-  const sessionKey = `session:${user._id}`;
-  await redis.set(
-    sessionKey,
-    JSON.stringify({ role: user.role, email: user.email, name: user.name }),
-    "EX",
-    Number(process.env.SESSION_TTL || 86400)
-  );
-
-  // Cookie HttpOnly (plus sécurisé que localStorage)
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000, // 24h en ms
-  });
-
-  return token;
-}
-
-// ── REGISTER ──────────────────────────────────────
+// ── REGISTER ──────────────────────────────────────────────────────────────────
 async function register(req, res) {
   try {
-    const { name, email, password, role = "guest" } = req.body;
+    const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password)
-      return res.status(400).json({ error: "Champs requis manquants" });
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "name, email et password sont requis" });
+    }
 
-    const exists = await User.findOne({ email });
-    if (exists)
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Le mot de passe doit contenir au moins 6 caractères" });
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
       return res.status(409).json({ error: "Email déjà utilisé" });
+    }
+
+    const password_hash = await bcrypt.hash(password, 12);
 
     const user = await User.create({
       name,
-      email,
-      password_hash: password, // hashé automatiquement par le pre-save hook
-      role,
-      is_active: true,
-      created_at: new Date(),
-      last_login: new Date(),
+      email:         email.toLowerCase(),
+      password_hash,
+      role:          role || "guest",
     });
 
-    const token = await generateSession(user, res);
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const redis = getRedis();
+    await redis.set(
+      `session:${user._id}`,
+      JSON.stringify({ userId: user._id, role: user.role }),
+      'EX',
+      SESSION_TTL
+    );
+
+    console.log(`✅ Nouvel utilisateur inscrit: ${user.email} (${user.role})`);
 
     res.status(201).json({
       token,
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        _id:        user._id,
+        name:       user.name,
+        email:      user.email,
+        role:       user.role,
+        avatar_url: user.avatar_url || "",
+      }
     });
+
   } catch (err) {
+    console.error("register error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
 
-// ── LOGIN ─────────────────────────────────────────
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password)
-      return res.status(400).json({ error: "Email et mot de passe requis" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "email et password requis" });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(401).json({ error: "Identifiants invalides" });
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+    }
 
-    if (user.is_active === false)
-      return res.status(403).json({ error: "Compte désactivé" });
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+    }
 
-    const ok = await user.comparePassword(password);
-    if (!ok)
-      return res.status(401).json({ error: "Identifiants invalides" });
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    // Mettre à jour last_login
-    user.last_login = new Date();
-    await user.save();
+    const redis = getRedis();
+    await redis.set(
+      `session:${user._id}`,
+      JSON.stringify({ userId: user._id, role: user.role }),
+      'EX',
+      SESSION_TTL
+    );
 
-    const token = await generateSession(user, res);
+    console.log(`✅ Login: ${user.email} (${user.role})`);
 
     res.json({
       token,
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        _id:        user._id,
+        name:       user.name,
+        email:      user.email,
+        role:       user.role,
+        avatar_url: user.avatar_url || "",
+      }
     });
+
   } catch (err) {
+    console.error("login error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
 
-// ── LOGOUT ────────────────────────────────────────
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
 async function logout(req, res) {
   try {
-    if (req.user) {
-      const redis = getRedis();
-      await redis.del(`session:${req.user.id}`); // supprime la session Redis
-    }
-    res.clearCookie("token");
-    res.json({ message: "Déconnecté" });
+    const redis = getRedis();
+    await redis.del(`session:${req.user.id}`);
+
+    console.log(`✅ Logout: ${req.user.email}`);
+    res.json({ message: "Déconnexion réussie" });
+
   } catch (err) {
+    console.error("logout error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
 
-// ── ME (profil connecté) ──────────────────────────
+// ── GET ME ────────────────────────────────────────────────────────────────────
 async function getMe(req, res) {
   try {
-    const user = await User.findById(req.user.id).select("-password_hash");
-    if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
-    res.json(user);
+    const user = await User
+      .findById(req.user.id)
+      .select("-password_hash");
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    res.json({
+      _id:        user._id,
+      name:       user.name,
+      email:      user.email,
+      role:       user.role,
+      avatar_url: user.avatar_url || "",
+      created_at: user.created_at,
+    });
+
   } catch (err) {
+    console.error("getMe error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }

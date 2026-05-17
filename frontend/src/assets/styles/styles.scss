@@ -1,14 +1,15 @@
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
-// setup
-@import './setup/variables';
-@import './setup/mixins';
-@import './setup/layout';
-@import './setup/function';
 
+// ── Setup (ordre obligatoire) ──
+@import './setup/variables';   // 1. Variables en PREMIER
+@import './setup/mixins';      // 2. Mixins après (ils lisent les variables)
+@import './setup/function';    // 3. Functions
+@import './setup/layout';      // 4. Layout en dernier
 
-// base
+// ── Base ──
 @import './base/basics';
 @import './base/buttons';
 @import './base/helpers';
 
-
+// ── Admin ──
+@import './admin/admin';

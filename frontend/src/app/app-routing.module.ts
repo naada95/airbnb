@@ -13,6 +13,7 @@ import { UserOrderComponent } from './cmps/user-order/user-order.component';
 import { UserStaysComponent } from './cmps/user-stays/user-stays.component';
 import { UserWishlistComponent } from './cmps/user-wishlist/user-wishlist.component';
 import { AboutComponent } from './pages/about/about.component';
+import { AdminGuard } from './guards/admin.guard';
 const routes: Routes = [
   { path: '', component: StayIndexComponent },
   { path: 'home', component: HomeComponent },
@@ -29,10 +30,18 @@ const routes: Routes = [
     ]
   },
   {
+    path: 'admin',
+    canActivate: [AdminGuard],
+    loadChildren: () =>
+      import('./admin/admin.module').then(m => m.AdminModule)
+  },
+  {
     path: ':stayId',                                  // ← TOUJOURS EN DERNIER
     loadChildren: () => import('./lazy-loading/lazy-loading.module').then(m => m.LazyLoadingModule),
     resolve: { stay: StayResolver },
   },
+    { path: '**', redirectTo: '' }
+
 ]
 
 @NgModule({

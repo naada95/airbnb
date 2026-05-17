@@ -1,0 +1,225 @@
+<div class="admin-layout">
+  <admin-nav></admin-nav>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <h1>{{ isEditMode ? '✏️ Modifier le listing' : '➕ Nouveau listing' }}</h1>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+    <form *ngIf="!isLoading" (ngSubmit)="onSubmit()" class="listing-form">
+
+      <!-- ── Infos principales ── -->
+      <section class="form-section">
+        <h2>Informations générales</h2>
+
+        <div class="form-group">
+          <label>Nom du listing *</label>
+          <input
+            type="text"
+            [(ngModel)]="form.name"
+            name="name"
+            placeholder="Ex: Belle villa avec piscine"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            [(ngModel)]="form.summary"
+            name="summary"
+            rows="4"
+            placeholder="Décrivez votre logement..."
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prix par nuit (€) *</label>
+            <input
+              type="number"
+              [(ngModel)]="form.price"
+              name="price"
+              min="1"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Capacité (personnes)</label>
+            <input
+              type="number"
+              [(ngModel)]="form.capacity"
+              name="capacity"
+              min="1"
+              max="20"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Chambres</label>
+            <input
+              type="number"
+              [(ngModel)]="form.bedrooms"
+              name="bedrooms"
+              min="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Salles de bain</label>
+            <input
+              type="number"
+              [(ngModel)]="form.bathrooms"
+              name="bathrooms"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Type de logement</label>
+          <select [(ngModel)]="form.roomType" name="roomType">
+            <option *ngFor="let type of roomTypes" [value]="type">
+              {{ type }}
+            </option>
+          </select>
+        </div>
+      </section>
+
+      <!-- ── Localisation ── -->
+      <section class="form-section">
+        <h2>Localisation</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ville</label>
+            <input
+              type="text"
+              [(ngModel)]="form.city"
+              name="city"
+              placeholder="Ex: Paris"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Pays</label>
+            <input
+              type="text"
+              [(ngModel)]="form.country"
+              name="country"
+              placeholder="Ex: France"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Adresse</label>
+          <input
+            type="text"
+            [(ngModel)]="form.address"
+            name="address"
+            placeholder="Ex: 12 rue de la Paix"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitude</label>
+            <input
+              type="number"
+              [(ngModel)]="form.lat"
+              name="lat"
+              step="0.0001"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Longitude</label>
+            <input
+              type="number"
+              [(ngModel)]="form.lan"
+              name="lan"
+              step="0.0001"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Photos ── -->
+      <section class="form-section">
+        <h2>Photos</h2>
+
+        <div class="img-add-row">
+          <input
+            type="text"
+            [(ngModel)]="newImgUrl"
+            name="newImgUrl"
+            placeholder="Coller une URL d'image..."
+          />
+          <button type="button" class="btn-edit" (click)="onAddImg()">
+            + Ajouter
+          </button>
+        </div>
+
+        <div class="img-preview-list">
+          <div
+            *ngFor="let url of form.imgUrls; let i = index"
+            class="img-preview-item"
+          >
+            <img [src]="url" alt="photo {{ i + 1 }}" />
+            <button type="button" (click)="onRemoveImg(i)">✕</button>
+          </div>
+        </div>
+
+        <p *ngIf="form.imgUrls.length === 0" class="empty">
+          Aucune photo ajoutée
+        </p>
+      </section>
+
+      <!-- ── Équipements ── -->
+      <section class="form-section">
+        <h2>Équipements</h2>
+
+        <div class="amenities-grid">
+          <label
+            *ngFor="let amenity of amenitiesList"
+            class="amenity-item"
+          >
+            <input
+              type="checkbox"
+              [checked]="isAmenityChecked(amenity)"
+              (change)="onToggleAmenity(amenity)"
+            />
+            {{ amenity }}
+          </label>
+        </div>
+      </section>
+
+      <!-- ── Actions ── -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="onCancel()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Sauvegarde...' : (isEditMode ? 'Mettre à jour' : 'Créer le listing') }}
+        </button>
+      </div>
+
+    </form>
+  </main>
+</div>

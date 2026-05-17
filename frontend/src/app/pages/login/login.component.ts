@@ -63,13 +63,24 @@ export class LoginComponent implements OnInit {
  async onSubmit(type: string) {
   const coords = type === 'signup' ? this.formSignup.value : this.formLogin.value
   try {
-    if (this.isSignup) await this.userService.signup({
-      ...coords,
-      name: coords.fullname,   // backend attend "name"
-      imgUrl: this.imgData.imgUrl
-    })
-    else await this.userService.login(coords)
-    this.router.navigateByUrl('')
+    if (this.isSignup) {
+      await this.userService.signup({
+        ...coords,
+        name: coords.fullname,
+        imgUrl: this.imgData.imgUrl
+      })
+    } else {
+      await this.userService.login(coords)
+    }
+
+    // ✅ Vérifier le rôle APRÈS le login
+    const user = this.userService.getUser()
+    if (user?.role === 'admin') {
+      this.router.navigateByUrl('/admin')
+    } else {
+      this.router.navigateByUrl('')
+    }
+
   } catch (err) {
     this.snackBar.open('Email ou mot de passe incorrect', 'Close', { duration: 3000 })
     console.log(err)
@@ -79,7 +90,12 @@ export class LoginComponent implements OnInit {
  async onSignDemo() {
   try {
     await this.userService.login({ email: 'test@test.com', password: '123456' } as any)
-    this.router.navigateByUrl('')
+    const user = this.userService.getUser()
+    if (user?.role === 'admin') {
+      this.router.navigateByUrl('/admin')
+    } else {
+      this.router.navigateByUrl('')
+    }
   } catch (err) {
     this.snackBar.open('Demo user introuvable', 'Close', { duration: 3000 })
   }

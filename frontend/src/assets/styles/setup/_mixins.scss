@@ -1,5 +1,7 @@
-/* Breakpoint mixins */
+// ── Import variables en premier ─────────────────────────────
+@import 'variables';
 
+// ── Breakpoint mixins ───────────────────────────────────────
 @mixin for-mobile-layout {
     @media (max-width: calc($mobile-breakpoint + 40px)) {
         @content;
@@ -36,6 +38,7 @@
     }
 }
 
+// ── Utilitaires ─────────────────────────────────────────────
 @mixin center-flex() {
     display: flex;
     align-items: center;
@@ -65,25 +68,15 @@
         gap: 32px;
     }
 
-    .title {
-        font-weight: 500;
-    }
+    .title { font-weight: 500; }
 
     div {
         display: flex;
         gap: 8px;
 
-        .icon-approved {
-            color: lightgreen;
-        }
-
-        .icon-pending {
-            color: yellow;
-        }
-
-        .icon-declined {
-            color: salmon;
-        }
+        .icon-approved { color: lightgreen; }
+        .icon-pending  { color: yellow; }
+        .icon-declined { color: salmon; }
     }
 }
 

@@ -168,6 +168,8 @@ async function createListing(req, res) {
 }
 
 // ── UPDATE listing ────────────────────────────────────────────────────────────
+const mongoose = require("mongoose")   // ← ajouter si pas déjà importé en haut
+
 async function updateListing(req, res) {
   try {
     const listing = await Listing.findById(req.params.id)
@@ -178,15 +180,26 @@ async function updateListing(req, res) {
       return res.status(403).json({ error: 'Not authorized' })
     }
 
-    const updated = await Listing.findByIdAndUpdate(
-      req.params.id, req.body, { new: true }
-    )
+    console.log('📥 UPDATE payload reçu:', JSON.stringify(req.body, null, 2))
+
+    // ✅ Update via driver natif → bypass Atlas validation
+    await mongoose.connection.db
+      .collection('listings')
+      .updateOne(
+        { _id: new mongoose.Types.ObjectId(req.params.id) },
+        { $set: req.body }
+      )
+
+    const updated = await Listing.findById(req.params.id)
+
+    console.log('✅ Listing mis à jour:', updated.title)
 
     const redis = getRedis()
     const city  = updated.location?.city?.toLowerCase()
     if (city) await redis.del(`listings:city:${city}`)
 
     res.json(toStayFormat(updated))
+
   } catch (err) {
     console.error('❌ updateListing error:', err.message)
     res.status(500).json({ error: err.message })

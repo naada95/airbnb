@@ -1,0 +1,64 @@
+<div class="admin-layout">
+  <admin-nav></admin-nav>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <h1>🏘️ Listings ({{ filteredListings.length }})</h1>
+      <button class="btn-primary" (click)="onNew()">
+        + Nouveau listing
+      </button>
+    </div>
+
+    <div class="admin-search">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom ou ville..."
+      />
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+    <table *ngIf="!isLoading" class="admin-table">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Nom</th>
+          <th>Ville</th>
+          <th>Prix/nuit</th>
+          <th>Capacité</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let listing of filteredListings">
+          <td>
+            <img
+              [src]="listing.imgUrls?.[0] || 'assets/no-image.png'"
+              alt=""
+              class="listing-thumb"
+            />
+          </td>
+          <td>{{ listing.name }}</td>
+          <td>{{ listing.loc?.city }}</td>
+          <td>{{ listing.price | currency:'EUR' }}</td>
+          <td>{{ listing.capacity }} pers.</td>
+          <td class="actions">
+            <button class="btn-edit"   (click)="onEdit(listing._id)">
+              ✏️ Éditer
+            </button>
+            <button class="btn-delete" (click)="onDelete(listing._id)">
+              🗑️ Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!isLoading && filteredListings.length === 0" class="empty">
+      Aucun listing trouvé.
+    </p>
+
+  </main>
+</div>

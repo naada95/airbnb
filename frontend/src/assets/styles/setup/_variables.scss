@@ -1,17 +1,80 @@
-// colors
-$header-text-color: #222222;
-$main-color:#717171;
-$secondary-color: #FF385C;
-$border-color: #dddddd;
-$main-hover:#F7F7F7;
-$black:#28282B;
+// Couleurs
+$primary: #FF385C;
+$primary-dark: #e0314f;
+$secondary: #222222;
+$text-light: #717171;
+$border: #dddddd;
+$bg-light: #f7f7f7;
+$white: #ffffff;
+$success: #008a05;
+$warning: #FFB400;
+$danger: #c13515;
+$info: #0077cc;
 
-// fonts
-$main-font: Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+// Espacements
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Border radius
+$radius-sm: 6px;
+$radius-md: 12px;
+$radius-lg: 16px;
+
+// Ombres
+$shadow-sm: 0 1px 4px rgba(0,0,0,0.1);
+$shadow-md: 0 2px 12px rgba(0,0,0,0.12);
+$shadow-lg: 0 4px 24px rgba(0,0,0,0.15);
+
+// Fonts
+$font-main: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+// Couleurs
+$primary:       #FF385C;
+$primary-dark:  #e0314f;
+$secondary:     #222222;
+$text-light:    #717171;
+$border:        #dddddd;
+$bg-light:      #f7f7f7;
+$white:         #ffffff;
+$success:       #008a05;
+$warning:       #FFB400;
+$danger:        #c13515;
+$info:          #0077cc;
+
+// Espacements
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Border radius
+$radius-sm: 6px;
+$radius-md: 12px;
+$radius-lg: 16px;
+
+// Ombres
+$shadow-sm: 0 1px 4px rgba(0,0,0,0.1);
+$shadow-md: 0 2px 12px rgba(0,0,0,0.12);
+$shadow-lg: 0 4px 24px rgba(0,0,0,0.15);
+
+// Fonts
+$font-main: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+// ── Alias pour compatibilité avec les composants existants ──
+$main-color:        $primary;
+$main-hover:        $bg-light;
+$secondary-color:   $text-light;
+$header-text-color: $secondary;
+$border-color:      $border;
+$black:             #000000;
+$main-font:         $font-main;
 
 // Breakpoints
-$mobile-breakpoint: 400px;
-$tablet-breakpoint: 650px;
-$narrow-breakpoint: 960px;
-$normal-breakpoint: 1400px;
-$wide-breakpoint: 1760px;
+$mobile-breakpoint:  480px;
+$tablet-breakpoint:  768px;
+$narrow-breakpoint:  1024px;
+$normal-breakpoint:  1280px;
+$wide-breakpoint:    1440px;

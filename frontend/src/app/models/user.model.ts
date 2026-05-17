@@ -6,4 +6,5 @@ export interface User {
     imgUrl: string
     userMsg: number
     hostMsg: number
+    role?:      string 
 }

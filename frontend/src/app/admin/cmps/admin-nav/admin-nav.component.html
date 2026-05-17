@@ -1,0 +1,36 @@
+<nav class="admin-nav">
+  <div class="admin-nav__brand">
+    <span>🏠 Admin Panel</span>
+  </div>
+
+  <ul class="admin-nav__links">
+    <li>
+      <a routerLink="/admin"
+         routerLinkActive="active">
+        📊 Dashboard
+      </a>
+    </li>
+    <li>
+      <a routerLink="/admin/listings"
+         routerLinkActive="active">
+        🏘️ Listings
+      </a>
+    </li>
+    <li>
+      <a routerLink="/admin/users"
+         routerLinkActive="active">
+        👥 Users
+      </a>
+    </li>
+    <li>
+      <a routerLink="/admin/bookings"
+         routerLinkActive="active">
+        📅 Bookings
+      </a>
+    </li>
+  </ul>
+
+  <button class="admin-nav__logout" (click)="onLogout()">
+    Déconnexion
+  </button>
+</nav>

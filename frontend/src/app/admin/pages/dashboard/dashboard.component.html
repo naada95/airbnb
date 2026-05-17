@@ -1,0 +1,83 @@
+<div class="admin-layout">
+  <admin-nav></admin-nav>
+
+  <main class="admin-main">
+    <h1>📊 Dashboard</h1>
+
+    <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+    <ng-container *ngIf="!isLoading">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+
+        <div class="stat-card" >
+          <span class="stat-card__icon">🏘️</span>
+          <span class="stat-card__value">{{ stats.totalListings }}</span>
+          <span class="stat-card__label">Listings</span>
+          <a routerLink="/admin/listings">Gérer →</a>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__icon">👥</span>
+          <span class="stat-card__value">{{ stats.totalUsers }}</span>
+          <span class="stat-card__label">Utilisateurs</span>
+          <a routerLink="/admin/users">Gérer →</a>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__icon">📅</span>
+          <span class="stat-card__value">{{ stats.totalBookings }}</span>
+          <span class="stat-card__label">Réservations</span>
+          <a routerLink="/admin/bookings">Gérer →</a>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__icon">💰</span>
+          <span class="stat-card__value">{{ +stats.revenue || 0 }} €</span>
+          <span class="stat-card__label">Revenus confirmés</span>
+        </div>
+
+      </div>
+
+      <!-- Réservations récentes -->
+      <div class="recent-section">
+        <h2>Réservations récentes</h2>
+
+        <table class="admin-table" *ngIf="recentBookings.length > 0">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>Guest</th>
+              <th>Check-in</th>
+              <th>Prix</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of recentBookings">
+              <td>{{ b.listing_id?.title || '—' }}</td>
+              <td>{{ b.guest_id?.name   || '—' }}</td>
+              <td>{{ b.check_in || '—' }}</td>
+              <td>{{ b.total_price || 0 }} €</td>
+              <td>
+                <span [class]="'badge ' + getStatusClass(b.status)">
+                  {{ b.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p *ngIf="recentBookings.length === 0" class="empty">
+          Aucune réservation pour le moment.
+        </p>
+
+        <a routerLink="/admin/bookings" class="see-all">
+          Voir toutes les réservations →
+        </a>
+      </div>
+
+    </ng-container>
+  </main>
+</div>

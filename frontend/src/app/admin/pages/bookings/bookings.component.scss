@@ -1,0 +1,109 @@
+// Coller dans users.component.scss et bookings.component.scss
+
+.user-avatar {
+  width:         32px;
+  height:        32px;
+  border-radius: 50%;
+  object-fit:    cover;
+  margin-right:  8px;
+  vertical-align: middle;
+}
+
+.user-info {
+  display:     flex;
+  align-items: center;
+}
+
+.guest-info {
+  display:        flex;
+  flex-direction: column;
+
+  small { color: #999; font-size: 0.8rem; }
+}
+
+.bookings-stats {
+  display:   flex;
+  gap:       16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.mini-stat {
+  background:    white;
+  border-radius: 8px;
+  padding:       12px 16px;
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  box-shadow:    0 2px 6px rgba(0,0,0,0.08);
+
+  strong { font-size: 1.2rem; }
+
+  &.revenue {
+    background: #fff8f0;
+    border:     1px solid #ffcc80;
+  }
+}
+
+.admin-filters {
+  display:       flex;
+  gap:           12px;
+  margin-bottom: 20px;
+  flex-wrap:     wrap;
+}
+
+.search-input {
+  flex:          1;
+  min-width:     200px;
+  padding:       10px 14px;
+  border:        1px solid #ddd;
+  border-radius: 6px;
+  font-size:     0.95rem;
+
+  &:focus {
+    outline:      none;
+    border-color: #ff385c;
+  }
+}
+
+.error-msg {
+  background:    #fef2f2;
+  border:        1px solid #fca5a5;
+  color:         #dc2626;
+  padding:       12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display:       flex;
+  align-items:   center;
+  gap:           12px;
+
+  button {
+    padding:       6px 12px;
+    background:    #dc2626;
+    color:         white;
+    border:        none;
+    border-radius: 4px;
+    cursor:        pointer;
+  }
+}
+
+.recent-section {
+  margin-top: 30px;
+
+  h2 {
+    margin-bottom: 16px;
+    font-size:     1.1rem;
+    color:         #333;
+  }
+}
+
+.see-all {
+  display:         block;
+  text-align:      right;
+  margin-top:      12px;
+  color:           #ff385c;
+  text-decoration: none;
+  font-size:       0.9rem;
+
+  &:hover { text-decoration: underline; }
+}

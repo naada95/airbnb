@@ -1,0 +1,125 @@
+<div class="admin-layout">
+  <admin-nav></admin-nav>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <h1>📅 Réservations ({{ filteredBookings.length }})</h1>
+    </div>
+
+    <!-- Stats rapides -->
+    <div class="bookings-stats">
+      <div class="mini-stat">
+        <span class="badge badge-warning">Pending</span>
+        <strong>{{ countByStatus.pending }}</strong>
+      </div>
+      <div class="mini-stat">
+        <span class="badge badge-success">Confirmed</span>
+        <strong>{{ countByStatus.confirmed }}</strong>
+      </div>
+      <div class="mini-stat">
+        <span class="badge badge-danger">Cancelled</span>
+        <strong>{{ countByStatus.cancelled }}</strong>
+      </div>
+      <div class="mini-stat">
+        <span class="badge badge-info">Completed</span>
+        <strong>{{ countByStatus.completed }}</strong>
+      </div>
+      <div class="mini-stat revenue">
+        <span>💰 Revenus confirmés</span>
+        <strong>{{ totalRevenue | currency:'EUR' }}</strong>
+      </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="admin-filters">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher listing ou guest..."
+        class="search-input"
+      />
+      <select [(ngModel)]="filterStatus" class="status-filter">
+        <option value="">Tous les statuts</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="errorMsg" class="error-msg">
+      {{ errorMsg }}
+      <button (click)="loadBookings()">Réessayer</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+    <!-- Table -->
+    <table *ngIf="!isLoading && !errorMsg" class="admin-table">
+      <thead>
+        <tr>
+          <th>Listing</th>
+          <th>Guest</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Nuits</th>
+          <th>Prix total</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let booking of filteredBookings">
+          <td>
+            {{ booking.listing_id?.title || '—' }}
+          </td>
+          <td>
+            <div class="guest-info">
+              <span>{{ booking.guest_id?.name  || '—' }}</span>
+              <small>{{ booking.guest_id?.email || '' }}</small>
+            </div>
+          </td>
+          <td>{{ booking.check_in  | date:'dd/MM/yyyy' }}</td>
+          <td>{{ booking.check_out | date:'dd/MM/yyyy' }}</td>
+          <td>{{ booking.guests_count }}</td>
+          <td>{{ booking.total_price | currency:'EUR' }}</td>
+          <td>
+            <span [class]="'badge ' + getStatusClass(booking.status)">
+              {{ booking.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <button
+              *ngIf="booking.status === 'pending'"
+              class="btn-edit"
+              (click)="onConfirm(booking._id)"
+            >
+              ✅
+            </button>
+            <button
+              *ngIf="booking.status !== 'cancelled' && booking.status !== 'completed'"
+              class="btn-delete"
+              (click)="onCancel(booking._id)"
+            >
+              ❌
+            </button>
+            <button
+              class="btn-delete"
+              (click)="onDelete(booking._id)"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!isLoading && !errorMsg && filteredBookings.length === 0" class="empty">
+      Aucune réservation trouvée.
+    </p>
+
+  </main>
+</div>
